@@ -2,6 +2,7 @@ package br.com.receitassaudaveis.ui;
 
 import br.com.receitassaudaveis.model.Recipe;
 import br.com.receitassaudaveis.model.RecipeFilter;
+import br.com.receitassaudaveis.model.User;
 import br.com.receitassaudaveis.service.RecipeService;
 
 import javax.swing.BorderFactory;
@@ -21,12 +22,11 @@ import java.awt.Frame;
 import java.sql.SQLException;
 import java.util.List;
 
-/** Painel reutilizável para o catálogo e para a área de favoritos. */
+/** Painel reutilizável para o catálogo e para os favoritos do usuário conectado. */
 public class RecipePanel extends JPanel {
 
-    private static final int USER_ID = 1; // Usuário visitante criado no script SQL.
-
     private final RecipeService service;
+    private final User currentUser;
     private final boolean favoritesOnly;
     private final Runnable onFavoriteChanged;
     private final Frame owner;
@@ -35,15 +35,16 @@ public class RecipePanel extends JPanel {
     private final JComboBox<String> categoryCombo = new JComboBox<>();
     private final JComboBox<String> restrictionCombo = new JComboBox<>();
     private final JComboBox<String> timeCombo = new JComboBox<>(new String[]{
-            "Qualquer tempo", "Até 15 minutos", "Até 30 minutos", "Até 45 minutos", "Até 60 minutos"
+        "Qualquer tempo", "Até 15 minutos", "Até 30 minutos", "Até 45 minutos", "Até 60 minutos"
     });
     private final RecipeTableModel tableModel = new RecipeTableModel();
     private final JTable table = new JTable(tableModel);
 
-    public RecipePanel(Frame owner, RecipeService service, boolean favoritesOnly, Runnable onFavoriteChanged)
-            throws SQLException {
+    public RecipePanel(Frame owner, RecipeService service, User currentUser,
+            boolean favoritesOnly, Runnable onFavoriteChanged) throws SQLException {
         this.owner = owner;
         this.service = service;
+        this.currentUser = currentUser;
         this.favoritesOnly = favoritesOnly;
         this.onFavoriteChanged = onFavoriteChanged;
         buildInterface();
@@ -54,7 +55,6 @@ public class RecipePanel extends JPanel {
     private void buildInterface() {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
-
         JPanel filters = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 6));
         filters.add(new JLabel("Buscar:"));
         filters.add(searchField);
@@ -64,7 +64,6 @@ public class RecipePanel extends JPanel {
         filters.add(restrictionCombo);
         filters.add(new JLabel("Tempo:"));
         filters.add(timeCombo);
-
         JButton searchButton = new JButton("Buscar");
         JButton clearButton = new JButton("Limpar filtros");
         filters.add(searchButton);
@@ -78,9 +77,9 @@ public class RecipePanel extends JPanel {
         table.setAutoCreateRowSorter(true);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton detailsButton = new JButton("Ver detalhes");
+        JButton detailsButton = new JButton("Ver detalhes e comentários");
         JButton favoriteButton = new JButton("Adicionar / remover favorito");
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         actions.add(favoriteButton);
         actions.add(detailsButton);
         add(actions, BorderLayout.SOUTH);
@@ -93,45 +92,32 @@ public class RecipePanel extends JPanel {
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent event) {
-                if (event.getClickCount() == 2) {
-                    openSelectedRecipe();
-                }
+                if (event.getClickCount() == 2) openSelectedRecipe();
             }
         });
     }
 
     private void loadFilterOptions() throws SQLException {
         categoryCombo.addItem("Todas");
-        for (String category : service.getCategories()) {
-            categoryCombo.addItem(category);
-        }
+        for (String category : service.getCategories()) categoryCombo.addItem(category);
         restrictionCombo.addItem("Todas");
-        for (String restriction : service.getRestrictions()) {
-            restrictionCombo.addItem(restriction);
-        }
+        for (String restriction : service.getRestrictions()) restrictionCombo.addItem(restriction);
     }
 
     public void refreshRecipes() {
         try {
-            String category = selectedFilterValue(categoryCombo);
-            String restriction = selectedFilterValue(restrictionCombo);
-            int maxMinutes = getMaxMinutes();
-            RecipeFilter filter = new RecipeFilter(
-                    searchField.getText(), category, restriction, maxMinutes, favoritesOnly
-            );
-            List<Recipe> recipes = service.search(filter, USER_ID);
+            RecipeFilter filter = new RecipeFilter(searchField.getText(), selectedFilterValue(categoryCombo),
+                    selectedFilterValue(restrictionCombo), getMaxMinutes(), favoritesOnly);
+            List<Recipe> recipes = service.search(filter, currentUser.getId());
             tableModel.setRecipes(recipes);
-        } catch (SQLException e) {
-            showDatabaseError(e);
+        } catch (SQLException ex) {
+            showDatabaseError(ex);
         }
     }
 
     private String selectedFilterValue(JComboBox<String> combo) {
         Object selected = combo.getSelectedItem();
-        if (selected == null || "Todas".equals(selected)) {
-            return "";
-        }
-        return selected.toString();
+        return selected == null || "Todas".equals(selected) ? "" : selected.toString();
     }
 
     private int getMaxMinutes() {
@@ -159,42 +145,39 @@ public class RecipePanel extends JPanel {
                     "Nenhuma receita selecionada", JOptionPane.INFORMATION_MESSAGE);
             return null;
         }
-        int modelRow = table.convertRowIndexToModel(selectedRow);
-        return tableModel.getRecipeAt(modelRow);
+        return tableModel.getRecipeAt(table.convertRowIndexToModel(selectedRow));
     }
 
     private void openSelectedRecipe() {
         Recipe recipe = getSelectedRecipe();
-        if (recipe == null) {
-            return;
-        }
+        if (recipe == null) return;
         try {
-            RecipeDetailDialog dialog = new RecipeDetailDialog(owner, recipe, service);
+            RecipeDetailDialog dialog = new RecipeDetailDialog(owner, recipe, service, currentUser);
             dialog.setVisible(true);
-        } catch (SQLException e) {
-            showDatabaseError(e);
+        } catch (SQLException ex) {
+            showDatabaseError(ex);
         }
     }
 
     private void toggleSelectedFavorite() {
         Recipe recipe = getSelectedRecipe();
-        if (recipe == null) {
-            return;
-        }
+        if (recipe == null) return;
         try {
-            boolean added = service.toggleFavorite(USER_ID, recipe.getId());
+            boolean added = service.toggleFavorite(currentUser.getId(), recipe.getId());
             JOptionPane.showMessageDialog(this,
-                    added ? "Receita adicionada aos favoritos." : "Receita removida dos favoritos.",
+                    added ? "Receita adicionada aos favoritos desta conta."
+                            : "Receita removida dos favoritos desta conta.",
                     "Favoritos", JOptionPane.INFORMATION_MESSAGE);
             onFavoriteChanged.run();
-        } catch (SQLException e) {
-            showDatabaseError(e);
+            refreshRecipes();
+        } catch (SQLException ex) {
+            showDatabaseError(ex);
         }
     }
 
-    private void showDatabaseError(SQLException e) {
+    private void showDatabaseError(SQLException ex) {
         JOptionPane.showMessageDialog(this,
-                "Não foi possível consultar o banco de dados.\n\nDetalhe: " + e.getMessage(),
+                "Não foi possível consultar o banco de dados.\n\nDetalhe: " + ex.getMessage(),
                 "Erro de banco de dados", JOptionPane.ERROR_MESSAGE);
     }
 }

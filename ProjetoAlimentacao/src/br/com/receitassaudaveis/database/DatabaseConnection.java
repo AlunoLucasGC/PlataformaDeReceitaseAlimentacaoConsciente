@@ -1,4 +1,3 @@
-
 package br.com.receitassaudaveis.database;
 
 import java.io.IOException;
@@ -10,66 +9,50 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+/** Centraliza a configuração e a abertura de conexões com o MySQL. */
 public final class DatabaseConnection {
 
     private static final Properties PROPERTIES = loadProperties();
 
-    private DatabaseConnection() {
-    }
+    private DatabaseConnection() { }
 
     private static Properties loadProperties() {
-
         Properties properties = new Properties();
-
-        // Primeiro tenta localizar o arquivo no classpath.
-        try (InputStream input =
-                DatabaseConnection.class.getResourceAsStream("/db.properties")) {
-
+        try (InputStream input = DatabaseConnection.class.getResourceAsStream("/db.properties")) {
             if (input != null) {
                 properties.load(input);
                 return properties;
             }
-
-        } catch (IOException e) {
-            throw new IllegalStateException(
-                    "Erro ao carregar db.properties: " + e.getMessage(), e);
+        } catch (IOException ex) {
+            throw new ExceptionInInitializerError("Não foi possível ler db.properties: " + ex.getMessage());
         }
 
-        // Caso não encontre, procura nos caminhos do projeto.
-        Path[] caminhos = {
+        // Fallback para projetos Ant do NetBeans, nos quais db.properties fica diretamente em src.
+        Path[] paths = {
             Path.of("src", "db.properties"),
             Path.of("src", "main", "resources", "db.properties")
         };
-
-        for (Path caminho : caminhos) {
-
-            if (Files.exists(caminho)) {
-
-                try (InputStream input = Files.newInputStream(caminho)) {
-
+        for (Path path : paths) {
+            if (Files.isRegularFile(path)) {
+                try (InputStream input = Files.newInputStream(path)) {
                     properties.load(input);
                     return properties;
-
-                } catch (IOException e) {
-
-                    throw new IllegalStateException(
-                            "Erro ao ler db.properties: " + e.getMessage(), e);
+                } catch (IOException ex) {
+                    throw new ExceptionInInitializerError("Erro ao ler " + path + ": " + ex.getMessage());
                 }
             }
         }
-
-        throw new IllegalStateException(
-                "Arquivo db.properties não encontrado. "
-                + "Coloque-o dentro da pasta src do projeto."
-        );
+        throw new ExceptionInInitializerError(
+                "Arquivo db.properties não encontrado. Coloque-o diretamente dentro de src.");
     }
 
     public static Connection getConnection() throws SQLException {
-
         String url = PROPERTIES.getProperty("db.url");
         String user = PROPERTIES.getProperty("db.user");
         String password = PROPERTIES.getProperty("db.password", "");
-
+        if (url == null || user == null) {
+            throw new SQLException("db.properties precisa definir db.url e db.user.");
+        }
         return DriverManager.getConnection(url, user, password);
     }
 }
