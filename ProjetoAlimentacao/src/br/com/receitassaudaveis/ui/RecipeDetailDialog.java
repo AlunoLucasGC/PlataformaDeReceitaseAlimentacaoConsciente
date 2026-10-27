@@ -58,10 +58,12 @@ public class RecipeDetailDialog extends JDialog {
     private void buildInterface(List<String> restrictions) {
         JPanel content = new JPanel();
         content.setLayout(new javax.swing.BoxLayout(content, javax.swing.BoxLayout.Y_AXIS));
+        content.setBackground(UITheme.BACKGROUND);
         content.setBorder(BorderFactory.createEmptyBorder(18, 20, 16, 20));
 
         JLabel title = new JLabel(recipe.getTitle());
         title.setFont(title.getFont().deriveFont(Font.BOLD, 24f));
+        title.setForeground(UITheme.GREEN_900);
         title.setAlignmentX(LEFT_ALIGNMENT);
         content.add(title);
         content.add(javax.swing.Box.createVerticalStrut(8));
@@ -85,6 +87,7 @@ public class RecipeDetailDialog extends JDialog {
         servingsPanel.setPreferredSize(new Dimension(150, 32));
         ingredientPanel.add(servingsPanel, BorderLayout.NORTH);
         ingredientsArea.setEditable(false);
+        UITheme.styleTextArea(ingredientsArea);
         ingredientsArea.setLineWrap(true);
         ingredientsArea.setWrapStyleWord(true);
         ingredientsArea.setFont(ingredientsArea.getFont().deriveFont(14f));
@@ -98,6 +101,7 @@ public class RecipeDetailDialog extends JDialog {
 
         JTextArea instructionsArea = new JTextArea(recipe.getInstructions());
         instructionsArea.setEditable(false);
+        UITheme.styleTextArea(instructionsArea);
         instructionsArea.setLineWrap(true);
         instructionsArea.setWrapStyleWord(true);
         instructionsArea.setFont(instructionsArea.getFont().deriveFont(14f));
@@ -114,6 +118,7 @@ public class RecipeDetailDialog extends JDialog {
         JPanel commentsPanel = new JPanel(new BorderLayout(6, 6));
         commentsPanel.setBorder(BorderFactory.createTitledBorder("Comentários"));
         commentsArea.setEditable(false);
+        UITheme.styleTextArea(commentsArea);
         commentsArea.setLineWrap(true);
         commentsArea.setWrapStyleWord(true);
         commentsArea.setFont(commentsArea.getFont().deriveFont(13f));
@@ -122,6 +127,8 @@ public class RecipeDetailDialog extends JDialog {
 
         JPanel commentEntry = new JPanel(new BorderLayout(6, 6));
         JButton postButton = new JButton("Publicar comentário");
+        UITheme.stylePrimaryButton(postButton);
+        UITheme.styleTextField(commentField);
         commentEntry.add(commentField, BorderLayout.CENTER);
         commentEntry.add(postButton, BorderLayout.EAST);
         if (currentUser.isGuest()) {
@@ -148,6 +155,7 @@ public class RecipeDetailDialog extends JDialog {
 
         add(new JScrollPane(content), BorderLayout.CENTER);
         JButton closeButton = new JButton("Fechar");
+        UITheme.styleSecondaryButton(closeButton);
         closeButton.addActionListener(event -> dispose());
         JPanel bottom = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
         bottom.add(closeButton);

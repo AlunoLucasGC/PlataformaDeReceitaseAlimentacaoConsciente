@@ -4,6 +4,7 @@ import br.com.receitassaudaveis.database.DatabaseConnection;
 import br.com.receitassaudaveis.model.User;
 import br.com.receitassaudaveis.ui.AuthDialog;
 import br.com.receitassaudaveis.ui.MainFrame;
+import br.com.receitassaudaveis.ui.UITheme;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -17,6 +18,7 @@ public class App {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            UITheme.install();
         } catch (Exception ignored) {
             // Mantém o tema padrão do Swing se o tema do sistema não estiver disponível.
         }

@@ -21,6 +21,11 @@ import java.awt.Font;
 import java.awt.Frame;
 import java.sql.SQLException;
 import java.util.List;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 
 /** Painel reutilizável para o catálogo e para os favoritos do usuário conectado. */
 public class RecipePanel extends JPanel {
@@ -71,9 +76,11 @@ public class RecipePanel extends JPanel {
         add(filters, BorderLayout.NORTH);
 
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.setRowHeight(29);
+        table.setRowHeight(32);
         table.setFont(table.getFont().deriveFont(13f));
-        table.getTableHeader().setFont(table.getTableHeader().getFont().deriveFont(Font.BOLD));
+
+        styleTableHeader();
+
         table.setAutoCreateRowSorter(true);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
@@ -180,4 +187,60 @@ public class RecipePanel extends JPanel {
                 "Não foi possível consultar o banco de dados.\n\nDetalhe: " + ex.getMessage(),
                 "Erro de banco de dados", JOptionPane.ERROR_MESSAGE);
     }
+    
+    
+private void styleTableHeader() {
+
+    DefaultTableCellRenderer headerRenderer =
+            new DefaultTableCellRenderer() {
+
+        @Override
+        public Component getTableCellRendererComponent(
+                JTable table, Object value,
+                boolean isSelected, boolean hasFocus,
+                int row, int column) {
+
+            JLabel label = (JLabel) super.getTableCellRendererComponent(
+                    table, value, isSelected, hasFocus, row, column
+            );
+
+            // Fundo e texto
+            label.setOpaque(true);
+            label.setBackground(new Color(35, 105, 76));
+            label.setForeground(Color.WHITE);
+
+            // Fonte
+            label.setFont(
+                    table.getFont().deriveFont(Font.BOLD, 13f)
+            );
+
+            // Alinhamento
+            label.setHorizontalAlignment(SwingConstants.LEFT);
+            label.setVerticalAlignment(SwingConstants.CENTER);
+
+            // Espaçamento e bordas
+            label.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(
+                            0, 0, 1, 1,
+                            new Color(220, 230, 224)
+                    ),
+                    BorderFactory.createEmptyBorder(5, 10, 5, 10)
+            ));
+
+            return label;
+        }
+    };
+
+    table.getTableHeader().setDefaultRenderer(headerRenderer);
+
+    table.getTableHeader().setPreferredSize(
+            new Dimension(
+                    table.getTableHeader().getPreferredSize().width,
+                    36
+            )
+    );
+
+    table.getTableHeader().setReorderingAllowed(false);
+}
+
 }

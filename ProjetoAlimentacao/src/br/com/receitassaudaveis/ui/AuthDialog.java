@@ -45,17 +45,21 @@ public class AuthDialog extends JDialog {
 
     private void buildInterface() {
         JPanel root = new JPanel(new BorderLayout(10, 10));
-        root.setBorder(BorderFactory.createEmptyBorder(18, 20, 14, 20));
+        root.setBackground(UITheme.BACKGROUND);
+        root.setBorder(BorderFactory.createEmptyBorder(20, 22, 16, 22));
         JLabel title = new JLabel("Bem-vindo ao Receitas Saudáveis");
-        title.setFont(title.getFont().deriveFont(java.awt.Font.BOLD, 20f));
+        title.setFont(title.getFont().deriveFont(java.awt.Font.BOLD, 21f));
+        title.setForeground(UITheme.GREEN_900);
         root.add(title, BorderLayout.NORTH);
 
         JTabbedPane tabs = new JTabbedPane();
+        tabs.setFont(tabs.getFont().deriveFont(java.awt.Font.BOLD, 12.5f));
         tabs.addTab("Entrar", createLoginPanel());
         tabs.addTab("Criar conta", createRegisterPanel());
         root.add(tabs, BorderLayout.CENTER);
 
         JButton guestButton = new JButton("Continuar como visitante");
+        UITheme.styleSecondaryButton(guestButton);
         guestButton.addActionListener(event -> {
             authenticatedUser = new User(1, "Visitante", "visitante@local");
             dispose();
@@ -70,13 +74,17 @@ public class AuthDialog extends JDialog {
     private JPanel createLoginPanel() {
         JPanel panel = new JPanel(new BorderLayout(8, 8));
         JPanel fields = new JPanel(new GridLayout(2, 2, 8, 12));
+        fields.setBackground(UITheme.SURFACE);
         fields.setBorder(BorderFactory.createEmptyBorder(24, 12, 12, 12));
         fields.add(new JLabel("E-mail:"));
+        UITheme.styleTextField(loginEmail);
         fields.add(loginEmail);
         fields.add(new JLabel("Senha:"));
+        UITheme.styleTextField(loginPassword);
         fields.add(loginPassword);
         panel.add(fields, BorderLayout.CENTER);
         JButton loginButton = new JButton("Entrar");
+        UITheme.stylePrimaryButton(loginButton);
         loginButton.addActionListener(event -> login());
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttons.add(loginButton);
@@ -88,17 +96,23 @@ public class AuthDialog extends JDialog {
     private JPanel createRegisterPanel() {
         JPanel panel = new JPanel(new BorderLayout(8, 8));
         JPanel fields = new JPanel(new GridLayout(4, 2, 8, 10));
+        fields.setBackground(UITheme.SURFACE);
         fields.setBorder(BorderFactory.createEmptyBorder(16, 12, 12, 12));
         fields.add(new JLabel("Nome:"));
+        UITheme.styleTextField(registerName);
         fields.add(registerName);
         fields.add(new JLabel("E-mail:"));
+        UITheme.styleTextField(registerEmail);
         fields.add(registerEmail);
         fields.add(new JLabel("Senha (mínimo 8 caracteres):"));
+        UITheme.styleTextField(registerPassword);
         fields.add(registerPassword);
         fields.add(new JLabel("Confirmar senha:"));
+        UITheme.styleTextField(confirmPassword);
         fields.add(confirmPassword);
         panel.add(fields, BorderLayout.CENTER);
         JButton registerButton = new JButton("Criar minha conta");
+        UITheme.stylePrimaryButton(registerButton);
         registerButton.addActionListener(event -> register());
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttons.add(registerButton);
