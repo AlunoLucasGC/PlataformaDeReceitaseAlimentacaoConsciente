@@ -16,6 +16,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.sql.SQLException;
+import java.awt.Color;
 
 /** Tela inicial para entrar, criar conta ou acessar como visitante. */
 public class AuthDialog extends JDialog {
@@ -84,7 +85,7 @@ public class AuthDialog extends JDialog {
         fields.add(loginPassword);
         panel.add(fields, BorderLayout.CENTER);
         JButton loginButton = new JButton("Entrar");
-        UITheme.stylePrimaryButton(loginButton);
+        styleActionButton(loginButton);
         loginButton.addActionListener(event -> login());
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttons.add(loginButton);
@@ -112,7 +113,7 @@ public class AuthDialog extends JDialog {
         fields.add(confirmPassword);
         panel.add(fields, BorderLayout.CENTER);
         JButton registerButton = new JButton("Criar minha conta");
-        UITheme.stylePrimaryButton(registerButton);
+        styleActionButton(registerButton);
         registerButton.addActionListener(event -> register());
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttons.add(registerButton);
@@ -170,4 +171,32 @@ public class AuthDialog extends JDialog {
                 "Não foi possível concluir a operação.\n\nDetalhe: " + ex.getMessage(),
                 "Erro de banco de dados", JOptionPane.ERROR_MESSAGE);
     }
+    
+    private void styleActionButton(JButton button) {
+
+    button.setEnabled(true);
+    button.setOpaque(true);
+    button.setContentAreaFilled(true);
+    button.setFocusPainted(false);
+
+    button.setBackground(new Color(35, 105, 76));
+    button.setForeground(Color.WHITE);
+
+    button.setFont(
+            button.getFont().deriveFont(
+                    java.awt.Font.BOLD, 13f
+            )
+    );
+
+    button.setBorder(
+            BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(
+                            new Color(27, 82, 59)
+                    ),
+                    BorderFactory.createEmptyBorder(
+                            8, 20, 8, 20
+                    )
+            )
+    );
+}
 }

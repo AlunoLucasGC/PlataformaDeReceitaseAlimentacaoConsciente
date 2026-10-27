@@ -159,17 +159,29 @@ public class MainFrame extends JFrame {
 
         manageButton.setEnabled(!currentUser.isGuest());
 
+       manageButton.setEnabled(true);
+
         manageButton.setToolTipText(
-                currentUser.isGuest()
-                ? "Crie uma conta ou entre para cadastrar receitas."
-                : "Cadastrar, editar ou excluir receitas."
+        "Cadastrar, editar ou excluir receitas"
         );
 
-        styleButton(manageButton, true);
+        manageButton.addActionListener(event -> {
 
-        manageButton.addActionListener(
-                event -> openRecipeManagement()
+       if (currentUser.isGuest()) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Para gerenciar receitas, você precisa "
+                + "entrar em uma conta cadastrada.",
+                "Acesso restrito",
+                JOptionPane.INFORMATION_MESSAGE
         );
+
+        return;
+    }
+
+    openRecipeManagement();
+});
 
         actions.add(manageButton);
 
