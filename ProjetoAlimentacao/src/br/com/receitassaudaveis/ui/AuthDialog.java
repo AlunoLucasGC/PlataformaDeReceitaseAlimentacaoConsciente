@@ -96,7 +96,7 @@ public class AuthDialog extends JDialog {
 
     private JPanel createRegisterPanel() {
         JPanel panel = new JPanel(new BorderLayout(8, 8));
-        JPanel fields = new JPanel(new GridLayout(4, 2, 8, 10));
+        JPanel fields = new JPanel(new GridLayout(4, 4, 4, 4));
         fields.setBackground(UITheme.SURFACE);
         fields.setBorder(BorderFactory.createEmptyBorder(16, 12, 12, 12));
         fields.add(new JLabel("Nome:"));
