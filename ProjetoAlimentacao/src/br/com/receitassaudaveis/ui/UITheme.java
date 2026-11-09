@@ -95,7 +95,7 @@ public final class UITheme {
                 BorderFactory.createLineBorder(BORDER, 1),
                 new EmptyBorder(5, 9, 5, 9)));
 
-        field.setPreferredSize(new java.awt.Dimension(230, 38));
+        field.setPreferredSize(new java.awt.Dimension(250, 50));
         field.setMinimumSize(new java.awt.Dimension(160, 36));
     }
 
