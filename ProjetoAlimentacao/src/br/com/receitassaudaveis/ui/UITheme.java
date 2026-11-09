@@ -80,13 +80,23 @@ public final class UITheme {
     }
 
     public static void styleTextField(JTextField field) {
-        field.setFont(field.getFont().deriveFont(13f));
+        // Mantém uma altura confortável para o texto e o cursor,
+        // inclusive em JPasswordField (que herda de JTextField).
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         field.setForeground(TEXT);
         field.setBackground(SURFACE);
         field.setCaretColor(GREEN_800);
+        field.setDisabledTextColor(MUTED);
+        field.setOpaque(true);
+
+        // Padding vertical menor e previsível evita que o cursor
+        // fique cortado em Look & Feel diferentes do Swing.
         field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(BORDER),
-                new EmptyBorder(7, 9, 7, 9)));
+                BorderFactory.createLineBorder(BORDER, 1),
+                new EmptyBorder(5, 9, 5, 9)));
+
+        field.setPreferredSize(new java.awt.Dimension(230, 38));
+        field.setMinimumSize(new java.awt.Dimension(160, 36));
     }
 
     public static void styleComboBox(JComboBox<?> combo) {
